@@ -1,0 +1,8 @@
+interface:
+  display_name: "Laravel OpenAPI"
+  short_description: "生成 Laravel Apifox OpenAPI 文档。"
+  brand_color: "#0F766E"
+  default_prompt: "使用 $laravel-openapi 根据这些 Laravel 路由生成可导入 Apifox 的 OpenAPI JSON。"
+
+policy:
+  allow_implicit_invocation: true

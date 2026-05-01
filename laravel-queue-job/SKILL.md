@@ -6,9 +6,33 @@ description: This skill should be used when the user asks to "新增 Job", "加�
 # 本仓库 Queue / Job 开发规范
 
 ## 适用位置
-- Job：`www/service.manage.wg.com/app/Jobs/**`
-- 消费者命令：`www/service.manage.wg.com/app/Console/Commands/**/Queue/**`
-- 队列初始化：`www/service.manage.wg.com/app/Console/Commands/System/Init/InitQueue.php`
+- 服务目录先按当前仓库实际存在目录探测，常见候选为 `www/service.core.ys.com`、`www/service.manage.wg.com`。
+- Job：`app/Jobs/**`
+- 消费者命令：`app/Console/Commands/**/Queue/**`
+- 队列初始化：`app/Console/Commands/System/Init/InitQueue.php`
+
+## 默认流程
+1. 先确认同模块 Job、消费者命令、连接名、队列初始化和入队方式。
+2. 判断是否适合 `BaseJob`、是否需要重复检测、失败回写和可重跑路径。
+3. 优先使用 `XxxJob::push(...)` 入队；现有模块有明确例外时跟随现有模式并说明原因。
+4. 消费者命令只封装 worker 调用，业务逻辑留在 Job / Business。
+5. 完成后做语法检查，并给出需要用户手动执行的消费者或初始化命令。
+
+## 需要先确认的情况
+- 新增连接、exchange、queue、routing key 或第三方消息协议。
+- 重复任务是否报错、锁释放时机、失败后是否自动重试属于业务策略。
+- 消费者运行方式、tries、timeout、delay 无法从同模块推断。
+
+## 注意事项 / 禁止项
+- 默认不直接 `dispatch(new XxxJob(...))`，避免绕过 BaseJob 初始化和去重。
+- 不在消费者命令中写业务逻辑。
+- 不主动启动长驻消费者或执行会消费线上消息的命令。
+
+## 完成检查
+- Job 连接名、去重因子、`process()`、失败处理已评估。
+- 入队端使用项目约定方式。
+- 消费者命令与 Job `CONNECTION` 一致。
+- 如新增 RabbitMQ 资源，已评估是否需要初始化命令。
 
 ## Job 规范（BaseJob 体系）
 1. 业务 Job 优先继承 `App\Jobs\BaseJob`。

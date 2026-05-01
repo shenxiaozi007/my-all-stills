@@ -6,8 +6,34 @@ description: This skill should be used when the user asks to "新增 migration",
 # 本仓库 Migration 开发规范
 
 ## 适用范围
-- migration 目录：`www/service.core.ys.com/database/migrations/**`
+- migration 目录先按当前仓库实际存在服务目录探测，常见候选：
+  - `www/service.core.ys.com/database/migrations/**`
+  - `www/service.manage.wg.com/database/migrations/**`
 - 本仓库存在按专题分子目录的写法（如 `database/migrations/20241226_patient/**`），新增时可按现有专题组织。
+
+## 默认流程
+1. 先确认服务目录、已有 migration 专题目录、是否已有同表/同字段 migration。
+2. 新增 migration 时，优先在 Laravel 服务目录执行 `php artisan make:migration ...` 生成文件，再修改生成文件。
+3. 按当前表结构设计 `up()` / `down()`，字段、默认值、注释、索引名与需求保持一致。
+4. 默认不执行 `migrate` / `rollback`；完成后给用户指定 `--path` 命令。
+5. 完成后至少执行 `php -l` 检查生成的 migration 文件。
+
+## 需要先确认的情况
+- 目标服务目录或专题目录无法从现有结构判断。
+- 变更涉及删除字段、改字段类型、大表加索引、数据回填或发布先后顺序。
+- DDL 与本仓库新表模板冲突，且无法判断应按历史表还是新规范落地。
+
+## 注意事项 / 禁止项
+- 不主动执行 `php artisan migrate`、`migrate:rollback`、`migrate --pretend`。
+- 不手写 `created_at` / `updated_at` / `deleted_at`；新表优先用 `$table->softDeletes();` 和 `$table->timestamps();`。
+- 单字段索引优先链式写在字段定义上；联合索引才后置声明。
+- 不修改用户未要求的历史 migration。
+
+## 完成检查
+- migration 文件由 `make:migration` 生成或已说明无法生成的原因。
+- `up()` / `down()` 成对完整，索引名、表名、字段名一致。
+- 已通过 `php -l`。
+- 已给出用户手动执行的 `php artisan migrate --path=/database/migrations/...php` 命令。
 
 ## 核心规则（Must）
 1. 表结构变更必须通过 migration，禁止线上手工改表。
@@ -43,7 +69,14 @@ description: This skill should be used when the user asks to "新增 migration",
    - 唯一索引：`$table->string('operation_log_no', 64)->default('')->comment('日志编号')->unique('operation_log_no');`
    - 普通索引：`$table->string('ip', 128)->default('')->comment('登录ip')->index('ip');`
    - 多字段联合索引或必须后置声明的索引，才使用 `$table->index([...], 'index_name')` / `$table->unique([...], 'index_name')`。
-5. 大表变更优先拆步，减少锁表与长事务风险。
+5. 新建表优先使用固定基础模板：
+   - 表注释写在 `Schema::create()` 内第一行：`$table->comment('模块 - 表含义');`
+   - 主键默认使用 `$table->bigIncrements('id');`
+   - 业务编号字段紧跟主键：`$table->string('简化的表名_no', 64)->default('')->comment('xx编号')->unique('索引名');`
+   - `add_time` / `last_update_time` 放在业务字段后：`$table->unsignedInteger('add_time')->default(0)->comment('添加时间');`、`$table->unsignedInteger('last_update_time')->default(0)->comment('最后更新时间');`
+   - 不要手写 `created_at` / `updated_at` / `deleted_at` 字段；统一使用 `$table->softDeletes();` 和 `$table->timestamps();`
+   - 需要完整模板时读取 `references/migration-skeleton.md`。
+6. 大表变更优先拆步，减少锁表与长事务风险。
 
 ## 回滚要点
 - `down()` 只回滚当前 migration 对应变更，避免误伤其他结构。
