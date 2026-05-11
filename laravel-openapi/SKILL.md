@@ -1,6 +1,6 @@
 ---
 name: laravel-openapi
-description: 当用户要求生成、更新或复用 Laravel 项目的 Apifox/OpenAPI 文档时使用本 skill，尤其适用于 docs/apifox/*.openapi.json、stills.openapi.json、stills.openapi.template.json、RBAC 路由文档，以及基于 routes/management/proxy/**/*.php 生成可导入 Apifox 的 OpenAPI JSON。
+description: 当用户要求生成、更新或复用 Laravel 项目的 Apifox/OpenAPI 文档时使用本技能，尤其适用于 docs/apifox/*.openapi.json、stills.openapi.json、stills.openapi.template.json、RBAC 路由文档，以及基于 routes/management/proxy/**/*.php 生成可导入 Apifox 的 OpenAPI JSON。
 ---
 
 # Laravel OpenAPI 文档规范
@@ -11,16 +11,16 @@ description: 当用户要求生成、更新或复用 Laravel 项目的 Apifox/Op
 
 ## 现有文档类型
 
-- `docs/apifox/crm-rbac-routes.openapi.json`：基于 `adm_permission.php` 和 `adm_role.php` 生成的可导入 OpenAPI JSON。
-- `docs/apifox/stills.openapi.json`：基于 `routes/management/proxy/rbac/*.php` 生成的可导入 OpenAPI JSON。
-- `docs/apifox/stills.openapi.template.json`：通用可复用模板，后续新增接口可直接复制扩展。
+- 当前项目可能没有 `docs/apifox`、`stills.openapi.json` 或 `stills.openapi.template.json`；生成前必须先在目标项目内实际查找，不要假设文件存在。
+- 如存在 `docs/apifox/*.openapi.json`：优先复用项目内现有 OpenAPI JSON 和模板。
+- 如不存在：根据目标项目真实路由、Controller、Business 校验新建 `docs/apifox/*.openapi.json`，或使用本 skill 内置模板作为起点。
 - 本 skill 内置模板：`assets/stills.openapi.template.json`。
 
 ## 默认流程
 
-1. 先定位目标 Laravel 项目根目录，不要默认在 skill 目录里生成业务文档。
-2. 优先读取现有路由文件、Controller 方法、Request/Business 校验逻辑和已有 `docs/apifox/*.openapi.json`。
-3. 如果是新增文档，优先复用项目里的 `docs/apifox/stills.openapi.template.json`；项目内没有时使用本 skill 的 `assets/stills.openapi.template.json`。
+1. 先定位目标 Laravel 项目根目录，当前重点候选为 `www/service.manage.wg.com`、`www/service.his.wg.com`；不要默认在 skill 目录里生成业务文档。
+2. 优先读取真实路由文件（常见 `routes/management/proxy/**`）、Controller 方法、Request/Business 校验逻辑、Model/Dao 字段和已有 `docs/apifox/*.openapi.json`。
+3. 如果是新增文档，先查项目内是否已有 `docs/apifox/stills.openapi.template.json`；项目内没有时再使用本 skill 的 `assets/stills.openapi.template.json`，并创建目标项目的 `docs/apifox`。
 4. 根据真实路由和业务方法更新 `paths`、HTTP method、`tags`、`summary`、`parameters`、`requestBody`。
 5. 管理端接口默认保留 `security: [{"bearerAuth": []}]`，除非路由明确是公开接口。
 6. 响应结构默认复用 `#/components/schemas/ApiResponse`，除非项目已有更具体的响应 schema。
@@ -41,13 +41,12 @@ description: 当用户要求生成、更新或复用 Laravel 项目的 Apifox/Op
 
 1. 打开 Apifox。
 2. 选择 `导入` -> `OpenAPI`。
-3. CRM RBAC 路由导入 `docs/apifox/crm-rbac-routes.openapi.json`。
-4. RBAC 系统路由导入 `docs/apifox/stills.openapi.json`。
-5. 新增接口文档生成后，再通过 OpenAPI 导入对应 JSON 文件。
+3. 导入本次生成或更新的 `docs/apifox/*.openapi.json`。
+4. 如果项目已有 `crm-rbac-routes.openapi.json` 或 `stills.openapi.json`，按实际文件名导入，不要凭旧模板假设。
 
 ## 模板复用方式
 
-1. 复制 `docs/apifox/stills.openapi.template.json` 为新文件，或从本 skill 的 `assets/stills.openapi.template.json` 复制。
+1. 优先复制项目内已有 `docs/apifox/stills.openapi.template.json` 为新文件；项目内没有时从本 skill 的 `assets/stills.openapi.template.json` 复制。
 2. 替换占位路径 `/management/proxy/your-prefix/your-path`。
 3. 替换占位标签 `YourTag`。
 4. 修改 `summary`、`parameters`、`requestBody`、`required` 和字段描述。
@@ -56,6 +55,7 @@ description: 当用户要求生成、更新或复用 Laravel 项目的 Apifox/Op
 ## 注意事项
 
 - 不要凭空编造接口字段；字段必须来自路由、Controller、Business 校验、DTO/FormRequest、Model 或用户明确说明。
+- 项目内没有 `docs/apifox` 或 `stills.openapi.json` 时，不要声称已有；需要文档时再新建。
 - 如果同一路由文件已有 OpenAPI 风格，优先保持一致。
 - 只改本次任务相关的 OpenAPI 路径，不顺手重构无关文档。
 - 生成后必须说明新增/修改了哪些接口、输出文件位置，以及 JSON 校验结果。

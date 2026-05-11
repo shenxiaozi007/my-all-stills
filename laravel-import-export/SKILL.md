@@ -1,19 +1,22 @@
 ---
 name: laravel-import-export
-description: This skill should be used when the user asks to "做导入", "做导出", "Excel/CSV 批量处理", "报表中心导出", or needs implementation aligned with this repository's ImportPatientBusiness and ReportCenter command patterns.
+description: 当用户要求“做导入”“做导出”“Excel/CSV 批量处理”“报表中心导出”，或需要按本仓库 ImportPatientBusiness、ReportCenter 命令等模式实现导入导出能力时使用本技能。
 ---
 
 # 本仓库导入导出开发规范
 
 ## 适用位置
-- 服务目录先按当前仓库实际存在目录探测，常见候选为 `www/service.core.ys.com`、`www/service.manage.wg.com`。
+- 服务目录先按当前仓库实际存在目录探测，当前重点候选为 `www/service.manage.wg.com`、`www/service.his.wg.com`。
+- 如果当前目录同时包含 `wg-manage-service` 和 `wg-his-service`，先判断目标项目，再进入对应服务目录。
 - 导入命令：`app/Console/Commands/**/Data/**`
+- Excel / 文件队列：`app/Console/Commands/Excel/Queue/**`、`app/Jobs/Excel/**`（存在时优先跟随）
 - 导入业务：`app/Modules/Resource/Business/**`、`app/Modules/Management/Business/**`
 - 报表导出：`app/Console/Commands/ReportCenter/**` + 报表业务层
+- 导出类：`app/Exports/**`
 - 模板资源：`resources/import/**`
 
 ## 默认流程
-1. 先确认同模块导入/导出命令、Business、Job、报表中心任务和文件解析方式。
+1. 先确认同模块导入/导出命令、Business、Job、`app/Exports/**`、报表中心任务和文件解析方式。
 2. 导入先明确文件来源、表头映射、必填列、去重键、失败记录和重跑策略。
 3. 导出先明确筛选条件快照、数据权限、敏感字段、任务状态流转和失败回写。
 4. 大文件优先分块处理；大导出优先考虑异步任务或报表中心，但按现有模块模式落地。
@@ -55,6 +58,7 @@ description: This skill should be used when the user asks to "做导入", "做�
 
 ## 本仓库常见实现习惯
 - 命令层只做参数读取和流程触发，核心逻辑下沉 Business。
+- 导入必须显式定义表头映射，不依赖 Excel/CSV 隐式列序。
 - 导入过程中常用进度输出（如 `cmd_progress_bar`）。
 - 行级失败通常可捕获后继续处理，最后统一汇总失败信息。
 - 报表中心 Job 可实现 `failed()` 回写任务失败原因。

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Laravel MySQL DDL"
+  short_description: "Draft MySQL DDL from requirements."
+  default_prompt: "使用 $laravel-mysql-ddl，先根据需求生成 MySQL DDL 草案，等我确认后再交给 $laravel-migrations 生成 migration。"

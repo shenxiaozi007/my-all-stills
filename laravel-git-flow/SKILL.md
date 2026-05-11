@@ -1,12 +1,12 @@
 ---
 name: laravel-git-flow
-description: This skill should be used when the user asks to "按项目规范起分支", "确认 beta/master 发布流", "修复分支怎么命名", or needs repository-specific branch/release guidance.
+description: 当用户要求“按项目规范起分支”“确认 beta/master 发布流”“修复分支怎么命名”，或需要本仓库分支、合并、发布、修复流程指导时使用本技能。
 ---
 
 # 本仓库 Git Flow 规范
 
 ## 默认流程
-1. 先确认当前分支、工作区状态、目标环境和需求类型（新功能/修复/发布）。
+1. 先确认目标 repo 是 `wg-manage-service` 还是 `wg-his-service`，再确认当前分支、工作区状态、目标环境和需求类型（新功能/修复/发布）。
 2. 根据需求类型选择 `dev/*` 或 `fix/*`，日期使用 `YYYYMMDD`。
 3. 执行前说明将要进行的 git 操作；涉及合并、推送、覆盖工作区时先确认。
 4. 如涉及 migration，提醒核对目标环境和分支对应关系。
@@ -14,6 +14,7 @@ description: This skill should be used when the user asks to "按项目规范起
 
 ## 需要先确认的情况
 - 用户未说明需求类型，且无法从上下文判断是新功能还是修复。
+- 当前目录同时包含 `wg-manage-service` 和 `wg-his-service`，且无法从用户目标或打开文件判断要操作哪个 repo。
 - 工作区存在未提交改动，且即将切分支、合并、rebase、reset 或覆盖文件。
 - 目标环境、发布日期或前后端分支命名需要协同。
 

@@ -1,21 +1,22 @@
 ---
 name: laravel-migrations
-description: This skill should be used when the user asks to "新增 migration", "改表结构", "加字段/索引", "写回滚", "执行指定 migration", or needs migration design and execution guidance for this repository.
+description: 当用户要求“新增 migration”“改表结构”“加字段/索引”“写回滚”“执行指定 migration”，或需要本仓库 migration 设计、生成、回滚和执行路径指导时使用本技能。
 ---
 
 # 本仓库 Migration 开发规范
 
 ## 适用范围
 - migration 目录先按当前仓库实际存在服务目录探测，常见候选：
-  - `www/service.core.ys.com/database/migrations/**`
   - `www/service.manage.wg.com/database/migrations/**`
+  - `www/service.his.wg.com/database/migrations/**`
+- 如果当前目录同时包含 `wg-manage-service` 和 `wg-his-service`，先确认目标项目，再进入对应服务目录执行 artisan 或校验命令。
 - 本仓库存在按专题分子目录的写法（如 `database/migrations/20241226_patient/**`），新增时可按现有专题组织。
 
 ## 默认流程
 1. 先确认服务目录、已有 migration 专题目录、是否已有同表/同字段 migration。
-2. 新增 migration 时，优先在 Laravel 服务目录执行 `php artisan make:migration ...` 生成文件，再修改生成文件。
+2. 新增 migration 时，优先在具体 Laravel 服务目录执行 `php artisan make:migration ...` 生成文件，再修改生成文件。
 3. 按当前表结构设计 `up()` / `down()`，字段、默认值、注释、索引名与需求保持一致。
-4. 默认不执行 `migrate` / `rollback`；完成后给用户指定 `--path` 命令。
+4. 默认不执行 `migrate` / `rollback`；完成后给用户指定服务目录内的 `--path` 命令。
 5. 完成后至少执行 `php -l` 检查生成的 migration 文件。
 
 ## 需要先确认的情况
@@ -33,7 +34,7 @@ description: This skill should be used when the user asks to "新增 migration",
 - migration 文件由 `make:migration` 生成或已说明无法生成的原因。
 - `up()` / `down()` 成对完整，索引名、表名、字段名一致。
 - 已通过 `php -l`。
-- 已给出用户手动执行的 `php artisan migrate --path=/database/migrations/...php` 命令。
+- 已给出用户在目标服务目录手动执行的 `php artisan migrate --path=/database/migrations/...php` 命令。
 
 ## 核心规则（Must）
 1. 表结构变更必须通过 migration，禁止线上手工改表。

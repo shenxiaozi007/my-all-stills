@@ -83,7 +83,7 @@
           "message": {"type": "string", "example": "success!"},
           "data": {},
           "time": {"type": "integer", "example": 1710000000},
-          "module": {"type": "string", "example": "service.core.ys.com"}
+          "module": {"type": "string", "example": "service.manage.wg.com"}
         },
         "required": ["code", "message", "data", "time", "module"]
       }

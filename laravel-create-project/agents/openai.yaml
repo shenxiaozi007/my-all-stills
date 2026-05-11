@@ -1,0 +1,4 @@
+interface:
+  display_name: "Laravel Create Project"
+  short_description: "Plan new backend projects."
+  default_prompt: "使用 $laravel-create-project，帮我规划一个新后端项目的目录、分层、环境、分支和后续 skills 使用顺序。"

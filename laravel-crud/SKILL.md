@@ -1,20 +1,22 @@
 ---
 name: laravel-crud
-description: This skill should be used when the user asks to "新增接口", "改增删改查", "做列表详情", "调整业务逻辑", or needs CRUD implementation that follows BaseController + Modules Business/Dao patterns in this repository.
+description: 当用户要求“新增接口”“改增删改查”“做列表详情”“调整业务逻辑”，或需要按本仓库 BaseController + Modules Business/Dao 分层模式实现 CRUD 能力时使用本技能。
 ---
 
 # 本仓库 CRUD 开发规范
 
 ## 典型分层路径
-- 服务目录先按当前仓库实际存在目录探测，常见候选为 `www/service.core.ys.com`、`www/service.manage.wg.com`。
+- 服务目录先按当前仓库实际存在目录探测，当前重点候选为 `www/service.manage.wg.com`、`www/service.his.wg.com`。
+- 如果当前目录同时包含 `wg-manage-service` 和 `wg-his-service`，必须先根据用户给出的入口、路由、模块名或打开文件判断目标项目；无法判断再问。
+- 管理端路由：`routes/management/proxy/**`（优先看同模块 route 文件）
 - Controller：`app/Http/Controllers/Management/Proxy/**`（常继承 `BaseController`）
 - Business：`app/Modules/Management/Business/**`（常继承 `BaseBusiness`）
-- Dao：`app/Modules/Basics/Dao/**`、`app/Modules/**/Dao/**`
-- Model：`app/Modules/**/Model/**`
+- Dao：主要在 `app/Modules/Basics/Dao/**`，少量在 `app/Modules/**/Dao/**`
+- Model：主要在 `app/Modules/Basics/Model/**`，少量在 `app/Modules/**/Model/**`
 
 ## 默认流程
 1. 先查同模块路由、Controller、Business、Dao、Model 的现有写法和命名。
-2. 开始编码前先列出计划新增/修改的 route 清单，让用户选择哪些 route 需要权限点；未选择需要权限的 route 默认使用 `WebRoute::AUTH_NEEDLESS`。
+2. 开始编码前先列出计划新增/修改的 route 清单，默认权限建议必须来自同模块 `WebRoute::*` 使用习惯；未选择需要权限的 route 默认使用 `WebRoute::AUTH_NEEDLESS`。
 3. 如果涉及列表接口（分页或不分页），开始编码前先列出可筛选字段候选，让用户选择哪些字段需要做筛选；只为用户确认的字段补 Model scope/Dao 查询能力。
 4. 明确接口输入输出、权限点、中间件、是否写操作、是否涉及表结构。
 5. 按薄 Controller、Business 校验与编排、Dao 查询持久化的分层落地。
@@ -53,7 +55,8 @@ description: This skill should be used when the user asks to "新增接口", "�
 - 推荐构造器注入：`__construct(protected Request $request, protected XxxBusiness $business)`。
 - 不在 Controller 写复杂业务分支。
 - 管理端写操作通常透传 `management_auth_info()`。
-- 管理端路由通常配 `auth:jwt-management` + `WebRoute::*` 权限点，保持与现有路由文件一致。
+- 管理端路由通常配 `auth:jwt-management` + `WebRoute::*` 权限点，保持与 `routes/management/proxy/**` 同模块文件一致。
+- 写接口是否加 `api_mutex` 优先参考同模块已有写接口；新增高风险写操作要在 route 清单里标注建议。
 
 ## Business 约束
 - 承担参数校验、业务编排、事务控制。
@@ -66,6 +69,7 @@ description: This skill should be used when the user asks to "新增接口", "�
 ## Dao 约束
 - 封装查询、分页、落库、局部更新。
 - 复用项目基础 Dao 能力（如 `getList/getPageList/findBy...`）。
+- 查询条件优先复用 Model 的 `scopeXxxQuery`、`scopeXxxLikeQuery`、时间范围 scope；只为需求确认的筛选字段补 scope。
 - 禁止 SQL 字符串拼接；Raw 语句必须参数绑定。
 
 ## 高风险点清单

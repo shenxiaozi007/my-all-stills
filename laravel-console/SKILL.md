@@ -1,18 +1,19 @@
 ---
 name: laravel-console
-description: This skill should be used when the user asks to "新增 artisan 命令", "写批处理命令", "配置定时任务", "加队列消费命令", or needs command implementation aligned with app/Console/Commands and app/Console/Kernel.php in this repo.
+description: 当用户要求“新增 artisan 命令”“写批处理命令”“配置定时任务”“加队列消费命令”，或需要按本仓库 app/Console/Commands 与 app/Console/Kernel.php 规范实现命令行能力时使用本技能。
 ---
 
 # 本仓库命令行开发规范
 
 ## 目录与注册
-- 服务目录先按当前仓库实际存在目录探测，常见候选为 `www/service.core.ys.com`、`www/service.manage.wg.com`。
+- 服务目录先按当前仓库实际存在目录探测，当前重点候选为 `www/service.manage.wg.com`、`www/service.his.wg.com`。
+- 如果当前目录同时包含 `wg-manage-service` 和 `wg-his-service`，先判断目标项目，再进入对应服务目录。
 - 命令类位置：`app/Console/Commands/**`
-- 命令注册入口：`app/Console/Kernel.php` 的 `*Commands()` 分组方法
-- 调度入口：`app/Console/Kernel.php` 的 `*Schedule()` 方法
+- 命令注册入口：`app/Console/Kernel.php` 的 `*Commands()` 分组方法，新增时优先追加到同业务分组。
+- 调度入口：`app/Console/Kernel.php` 的 `*Schedule()` 方法，新增时优先跟随同模块 schedule 写法。
 
 ## 默认流程
-1. 先确认服务目录、命令目录、同模块签名风格、Kernel 注册分组。
+1. 先确认服务目录、命令目录、同模块签名风格、Kernel 注册分组和是否已有调度。
 2. 判断是否是一次性命令、定时任务、队列消费者或修复脚本。
 3. `handle()` 保持编排：读取参数、基础校验、调用 Business、输出开始/结束/统计。
 4. 大数据量或写操作评估分批、幂等、事务边界和可重跑方式。
@@ -56,6 +57,7 @@ description: This skill should be used when the user asks to "新增 artisan 命
 - 使用 `runInBackground()` 避免阻塞 scheduler。
 - 使用 `appendOutputTo()` 固定日志落盘路径。
 - 任务开关通过 `config('schedule...')` 控制。
+- 日志文件名、调度频率和配置开关优先复制同模块附近任务的写法，不新造风格。
 
 ## 队列消费命令要点
 - 消费命令仅封装 worker 调用，不写业务代码。
